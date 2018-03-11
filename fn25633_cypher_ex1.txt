@@ -1,0 +1,54 @@
+
+CREATE (you:Person {name:"You"})
+RETURN you
+
+MATCH  (you:Person {name:"You"})
+CREATE (you)-[like:LIKE]->(neo:Database {name:"Neo4j" })
+RETURN you,like,neo
+
+MATCH (you:Person {name:"You"})
+FOREACH (name in ["Johan","Rajesh","Anna","Julia","Andrew"] |
+  CREATE (you)-[:FRIEND]->(:Person {name:name}))
+
+MATCH (you { name: "You"})-[:FRIEND]->(yourFriends)
+RETURN you,yourFriends
+
+MATCH (neo:Database {name:"Neo4j"})
+MATCH (anna:Person {name:"Anna"})
+CREATE (anna)-[:FRIEND]->(:Person:Expert { name:"Amanda"})-[:WORKED_WITH]->(neo)
+
+MATCH (you {name:"You"})
+MATCH (expert)-[:WORKED_WITH]->(db:Database {name:"Neo4j"})
+MATCH path = shortestPath( (you)-[:FRIEND*..5]-(expert) )
+RETURN db,expert,path
+
+MATCH(user: User)
+ RETURN user
+
+MATCH(user :User{name:"Susan"})
+ RETURN user
+
+MATCH(troll: Troll)-[:POSTED]->(tweet: Tweet)-[:MENTIONS]->(user :User{name:"Susan"})
+ RETURN troll, tweet, user
+
+MATCH (ht:Hashtag)<-[:HAS_TAG]-(tw:Tweet)<-[:POSTED]-(:Troll)
+WITH ht, COUNT(tw) AS num ORDER BY num DESC
+RETURN ht.tag AS hashtag, num LIMIT 10
+
+CREATE (StarWars: Moview {title:'Star Wars',tagline:'The force will be with you'})
+CREATE (George: Person {name: 'George Lucas', born:1944})
+CREATE 
+	(George)-[:WROTE]->(StarWars),
+    (George)-[:DIRECTED]->(StarWars)
+
+MATCH(moview: Moview)
+DETACH DELETE moview
+
+CREATE (StarWars: Movie {title:'Star Wars', released:1977})
+CREATE 
+	(George)-[:WROTE]->(StarWars),
+    (George)-[:DIRECTED]->(StarWars)
+
+MATCH(George: Person{name:"George Lucas"})-[:WROTE]->(movie:Movie)
+SET movie+={tag_line:"The force will be with you"}
+
